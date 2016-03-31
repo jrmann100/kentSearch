@@ -107,11 +107,6 @@ modManager = {
 			});
 			element.setAttribute("name", "module_entry");
 			element.setAttribute("data-module", item.name);
-			/*if(item.html_elem_properties.innerHTML){
-				for(var a in item.html_elem_properties.innerHTML){
-					element.appendChild(a);
-				}
-			}*/
 			element.style.display = 'none';
 			document.getElementById("SearchForm").appendChild(element);
 			if(item.html_elem_properties.innerHTML){
@@ -122,8 +117,9 @@ modManager = {
 		});
 		var submit_button = document.createElement("button");
 		//submit_button.setAttribute("type", "submit");
+		submit_button.id = 'SubmitButton';
 		submit_button.innerHTML = "Go";
-		submit_button.setAttribute("onclick", "modManager.go_to();");
+		//submit_button.setAttribute("onclick", "modManager.go_to();");
 		document.getElementById("SearchForm").appendChild(submit_button);
 		document.getElementById("SearchForm").appendChild(document.createElement("br"));
 		this.loaded_modules.forEach(function(item, index){
@@ -131,32 +127,44 @@ modManager = {
 			radio_element.setAttribute("type", "radio");
 			radio_element.setAttribute("name", "module_sel");
 			radio_element.setAttribute("value", item.name);
-			radio_element.setAttribute("onclick", "modManager.select(modManager.get(this.getAttribute('value')));");
+			//radio_element.setAttribute("onclick", "modManager.select(this.value);");
 			document.getElementById("SearchForm").appendChild(radio_element);
 			document.getElementById("SearchForm").innerHTML += " " + item.name;
 			if(item.attributes.indexOf("no_newline") === -1){
 				document.getElementById("SearchForm").appendChild(document.createElement("br"));
 			}
 		});
-	},
-	select: function(module) {
-		this.selected_module = module;
-		this.refreshHtml();
-		for(var i of [].slice.call(document.getElementsByName("module_sel"))){
-			if(i.getAttribute("value") === module.name){
-				i.setAttribute("checked", "checked");
-			}
-		}
-		for(var a of [].slice.call(document.getElementsByName("module_entry"))){
-			if(a.getAttribute("data-module") === module.name){
-				a.style.display = 'inline';
-			}
-		}
+		(function() {
+			//Outsider scope onclick
+			document.getElementById("SubmitButton").onclick = function() {
+				modManager.go_to();
+			};
+			[].slice.call(document.getElementsByName("module_sel")).forEach(function(item){
+				item.onclick = function() {
+					modManager.select(this.value);
+				};
+			});
+		})();
 	},
 	get: function(name){
 		for(var i of Object.keys(this.loaded_modules)){
 			if(this.loaded_modules[i].name === name){
 				return this.loaded_modules[i];
+			}
+		}
+	},
+	select: function(name) {
+		if(!this.get(name)) return false;
+		this.selected_module = this.get(name);
+		this.refreshHtml();
+		for(var i of [].slice.call(document.getElementsByName("module_sel"))){
+			if(i.getAttribute("value") === name){
+				i.setAttribute("checked", "checked");
+			}
+		}
+		for(var a of [].slice.call(document.getElementsByName("module_entry"))){
+			if(a.getAttribute("data-module") === name){
+				a.style.display = 'inline';
 			}
 		}
 	},
@@ -192,7 +200,7 @@ modManager = {
 		//Module valid.
 		
 		this.loaded_modules.push(mod);
-		this.select(mod);
+		this.select(mod.name);
 		return true;
 	},
 	unload: function(name){
@@ -201,7 +209,7 @@ modManager = {
 			if(this.loaded_modules.length === 0){
 				this.refreshHtml();
 			}else{
-				this.select(this.loaded_modules[0]);
+				this.select(this.loaded_modules[0].name);
 			}
 			return true;
 		}else{
