@@ -1,4 +1,3 @@
-//Class list to be implemented with automatic list-fetching.
 const kentClasses = {
   "5th Grade Band": "BAND5",
   "6th Grade Band": "BAND6",
@@ -73,100 +72,191 @@ const kentClasses = {
   "Spanish B": "SPANB",
   "Woodworking 5": "WOOD5",
   "Woodworking 8": "WOOD8"
-}
+};
 
-function populateOptions() {
-  var select_object = document.getElementById('SearchSelect');
-  Object.keys(kentClasses).forEach(function(item, index){
-    var element = document.createElement('option');
-    element.innerHTML = item;
-    element.value = kentClasses[item];
-    select_object.appendChild(element);
-  });
-}
-populateOptions();
-
-// Launch when DOM is ready.
-function whenDocumentIsReady(fn) {
-if (document.readyState !== 'loading'){
-        fn();
-    } else {
-        document.addEventListener('DOMContentLoaded', fn);
-    }
-}
-
-var formController = {
-  current_mode: 'select_name',
-  refresh_mode: function() {
-    //Use display properties and option value/innerHTML to determine mode.
-    if(document.getElementById('SearchEntry').style.display === 'none'){
-      if(document.getElementById('SearchSelect').children[0].value === document.getElementById('SearchSelect').children[0].innerHTML){
-        this.current_mode = 'select_id';
-      }else{
-        this.current_mode = 'select_name';
-      }
-    }else{
-      this.current_mode = 'textfield';
-    }
-  },
-  select_name: function() {
-    document.getElementById('SearchEntry').style.display = 'none';
-    document.getElementById('SearchSelect').style.display = 'inline';
-    document.getElementById('SearchSelect').innerHTML = '';
-    Object.keys(kentClasses).forEach(function(item, index){
-      var elem = document.createElement('option');
-      elem.innerHTML = item;
-      elem.value = kentClasses[item];
-      document.getElementById('SearchSelect').appendChild(elem);
-    });
-    this.current_mode = 'select_name';
-  },
-  
-  select_id: function() {
-    document.getElementById('SearchEntry').style.display = 'none';
-    document.getElementById('SearchSelect').style.display = 'inline';
-    document.getElementById('SearchSelect').innerHTML = '';
-    Object.keys(kentClasses).forEach(function(item, index){
-      var elem = document.createElement('option');
-      elem.innerHTML = kentClasses[item];
-      elem.value = kentClasses[item];
-      document.getElementById('SearchSelect').appendChild(elem);
-    });
-    this.current_mode = 'select_id';
-  },
-  
-  textfield: function() {
-    document.getElementById('SearchSelect').style.display = 'none';
-    document.getElementById('SearchEntry').style.display = 'inline';
-    this.current_mode = 'textfield';
-  }
-}
-
-function HandleForm() {
-  if(formController.current_mode === 'select_name' ||
-     formController.current_mode === 'select_id'){
-    var elem = document.getElementById('SearchSelect');
-    window.open("http://www.edlinesites.net/pages/Kent_Middle_School/Classes/" + elem.options[elem.selectedIndex].value);
-  }else if(formController.current_mode === 'textfield'){
-    var element = document.getElementById('SearchEntry');
-    window.open("http://www.edlinesites.net/pages/Kent_Middle_School/Classes/" + element.value);
-  }
-}
-
-var form = document.getElementById('SearchForm');
-if (form.attachEvent) {
-    form.attachEvent("submit", HandleForm);
-} else {
-    form.addEventListener("submit", HandleForm);
-}
-
-radios = document.getElementsByName('input-type-selection')
-for(var i = 0; i < radios.length; i++){
-  radios[i].onclick = function(){
-    formController[this.value]();
-  }
-}
 
 document.getElementById('aboutPage').onclick = function() {
-  window.open("http://broaderator.com/projects/kentSearch/about.html")
-}
+  window.open("http://broaderator.com/projects/kentSearch/about.html");
+};
+
+modManager = {
+	loaded_modules: [],
+	selected_module: undefined,
+	get_module_entry: function(name){
+		for(var i of [].slice.call(document.getElementsByName("module_entry"))){
+			if(i.getAttribute("data-module") === name){
+				return i;
+			}
+		}
+	},
+	get_module_radio: function(name){
+		for(var i of [].slice.call(document.getElementsByName("module_sel"))){
+			if(i.getAttribute("value") === name){
+				return i;
+			}
+		}
+	},
+	refreshHtml: function(){
+		document.getElementById("SearchForm").innerHTML = '';
+		this.loaded_modules.forEach(function(item, index){
+			//Create elements.
+			var element = document.createElement(item.html_elem_properties.tag ? 
+			    item.html_elem_properties.tag : "input");
+			Object.keys(item.html_elem_properties.attributes).forEach(function(i, index){
+				element.setAttribute(i, item.html_elem_properties.attributes[i]);
+			});
+			element.setAttribute("name", "module_entry");
+			element.setAttribute("data-module", item.name);
+			/*if(item.html_elem_properties.innerHTML){
+				for(var a in item.html_elem_properties.innerHTML){
+					element.appendChild(a);
+				}
+			}*/
+			element.style.display = 'none';
+			document.getElementById("SearchForm").appendChild(element);
+			if(item.html_elem_properties.innerHTML){
+				item.html_elem_properties.innerHTML.forEach(function(atem, index){
+					modManager.get_module_entry(item.name).appendChild(atem);
+				});
+			}
+		});
+		var submit_button = document.createElement("button");
+		//submit_button.setAttribute("type", "submit");
+		submit_button.innerHTML = "Go";
+		submit_button.setAttribute("onclick", "modManager.go_to();");
+		document.getElementById("SearchForm").appendChild(submit_button);
+		document.getElementById("SearchForm").appendChild(document.createElement("br"));
+		this.loaded_modules.forEach(function(item, index){
+			var radio_element = document.createElement("input");
+			radio_element.setAttribute("type", "radio");
+			radio_element.setAttribute("name", "module_sel");
+			radio_element.setAttribute("value", item.name);
+			radio_element.setAttribute("onclick", "modManager.select(modManager.get(this.getAttribute('value')));");
+			document.getElementById("SearchForm").appendChild(radio_element);
+			document.getElementById("SearchForm").innerHTML += " " + item.name;
+			if(item.attributes.indexOf("no_newline") === -1){
+				document.getElementById("SearchForm").appendChild(document.createElement("br"));
+			}
+		});
+	},
+	select: function(module) {
+		this.selected_module = module;
+		this.refreshHtml();
+		for(var i of [].slice.call(document.getElementsByName("module_sel"))){
+			if(i.getAttribute("value") === module.name){
+				i.setAttribute("checked", "checked");
+			}
+		}
+		for(var a of [].slice.call(document.getElementsByName("module_entry"))){
+			if(a.getAttribute("data-module") === module.name){
+				a.style.display = 'inline';
+			}
+		}
+	},
+	get: function(name){
+		for(var i of Object.keys(this.loaded_modules)){
+			if(this.loaded_modules[i].name === name){
+				return this.loaded_modules[i];
+			}
+		}
+	},
+	load: function(mod){
+		/*
+		Module format:
+		handle_submit (function(elem))
+		name (string)
+		attributes (array)
+		html_elem_properties (object)
+		properties format: {
+			attributes: {
+				type: (text, password)
+				value: (str)
+				placeholder: (...)
+			},
+			(optional) tag: ... (default: input),
+			(optional) innerHTML: ... (default: [] (Expecting array of DOM elements))
+		}
+		*/
+		for(var i of ["handle_submit", "name", "attributes", "html_elem_properties"]){
+			if(Object.keys(mod).indexOf(i) === -1){
+				console.log("Invalid module inserted (missing key " + i + ")");
+				return false;
+			}
+		}
+		
+		if(this.get(mod.name)){
+			console.log("Duplicate module inserted");
+			return false;
+		}
+		
+		//Module valid.
+		
+		this.loaded_modules.push(mod);
+		this.select(mod);
+		return true;
+	},
+	unload: function(name){
+		if(this.get(name)){
+			this.loaded_modules.pop(this.get(name)).name;
+			if(this.loaded_modules.length === 0){
+				this.refreshHtml();
+			}else{
+				this.select(this.loaded_modules[0]);
+			}
+			return true;
+		}else{
+			console.log("Cannot unload module " + name + ", module not found");
+			return false;
+		}
+	},
+	
+	go_to: function() {
+		if(this.selected_module){
+			this.selected_module.handle_submit(this.get_module_entry(this.selected_module.name));
+		}
+	}
+};
+
+
+// --- Standard Modules
+
+
+var nameSel_Elements = [];
+Object.keys(kentClasses).forEach(function(item, index){
+	var elem = document.createElement("option");
+	elem.innerHTML = item;
+	elem.value = kentClasses[item];
+	nameSel_Elements.push(elem);
+});
+modManager.load({
+	name: "Name Selection",
+	handle_submit: function(elem){
+		window.open("http://edlinesites.net/pages/Kent_Middle_School/Classes/" + elem.value);
+	},
+	attributes: [],
+	html_elem_properties: {
+		attributes: {},
+		tag: 'select',
+		innerHTML: nameSel_Elements
+	}
+});
+
+modManager.load({
+	name: "ID Entry",
+	handle_submit: function(elem){
+		for(var i in kentClasses){
+			if(elem.value === kentClasses[i]){
+				window.open("http://edlinesites.net/pages/Kent_Middle_School/Classes/" + elem.value);
+				return true;
+			}
+		}
+		alert("That class cannot be found.");
+	},
+	attributes: [],
+	html_elem_properties: {
+		attributes: {
+			placeholder: 'Class ID...',
+			type: 'text'
+		}
+	}
+});
