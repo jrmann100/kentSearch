@@ -253,7 +253,7 @@ modManager.load({
 	name: "ID Entry",
 	handle_submit: function(elem){
 		for(var i in kentClasses){
-			if(elem.value === kentClasses[i]){
+			if(elem.value.toUpperCase() === kentClasses[i]){
 				window.open("http://edlinesites.net/pages/Kent_Middle_School/Classes/" + elem.value);
 				return true;
 			}
