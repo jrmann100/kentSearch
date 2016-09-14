@@ -85,6 +85,9 @@ main.controller("search_app", function($scope){
 	$scope.inputNotFound = "That class cannot be found.";
 	$scope.aboutPage = "http://broaderator.com/projects/kentSearch/about.html"
 	$scope.handler = function(selectValue){
-		window.open("http://edlinesites.net/pages/Kent_Middle_School/Classes/" + selectValue);
+		if(selectValue)
+			window.open("http://edlinesites.net/pages/Kent_Middle_School/Classes/" + selectValue);
+		else
+			alert("I do not understand your selection.");
 	};
 });
