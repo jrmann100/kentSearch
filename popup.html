@@ -1,112 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link href='https://fonts.googleapis.com/css?family=Roboto:200,400,500,400italic' rel='stylesheet' type='text/css'>
-	<link href="angular/angular-material.min.css" rel="stylesheet" type="text/css">
-	<script src="angular/angular.min.js" language="JavaScript" type="text/javascript"></script>
-	<script src="angular/angular-animate.min.js" language="JavaScript" type="text/javascript"></script>
-	<script src="angular/angular-aria.min.js" language="JavaScript" type="text/javascript"></script>
-	<script src="angular/angular-messages.min.js" language="JavaScript" type="text/javascript"></script>
-	<script src="angular/angular-material.min.js"></script>
-	<style>
-	body {
-		font-family: Roboto, sans-serif;
-		margin: 0 0;
-	}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,500,400italic' rel='stylesheet' type='text/css'>
+  <style>
+    body {
+      font-family: Roboto, sans-serif;
+      margin: 0 0;
+    }
 
-	#headbar {
-		background-color: #1E88E5;
-		width: 400px;
-		overflow: visible;
-		font-weight: 200;
-		font-size: 16px;
-		height: 40px;
-		padding: 10px;
-		display: flex;
-		box-shadow: 0 2px 6px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-	}
-	
-	#headbar img {
-		max-height: 40px;
-	}
+    #headbar {
+      background-color: #1E88E5;
+      width: 400px;
+      overflow: visible;
+      text-align: center;
+      height: 50px;
+      padding-top: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    }
+    #content {
+      text-align: center;
+    }
 
-	card {
-		display: inline-block;
-		box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-		margin: 8px auto;
-		padding: 16px;
-		text-align: center;
-		box-sizing: border-box;
-		overflow: hidden;
-		border-radius: 2px;
-	}
+    card {
+      display: inline-block;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+      margin: 8px auto;
+      padding: 16px;
+      text-align: center;
+      box-sizing: border-box;
+      overflow: hidden;
+      border-radius: 2px;
+    }
 
-	#SearchSelect, #SearchEntry {
-		margin: 0 auto;
-	}
-	
-	#footer {
-		width: 100vw;
-		font-size: 10px;
-		position: absolute;
-		bottom: 0px;
-	}
-	</style>
+    #SearchSelect, #SearchEntry {
+      margin: 0 auto;
+    }
+    
+    #footer {
+      text-align: center;
+      font-size: 8px;
+    }
+  </style>
 </head>
-<body ng-app="KSApp" ng-controller="search_app" ng-cloak>
-	<div id="headbar">
-		<div><img src="icon.png"></div>
-		<div style="width: 10px;"></div>
-		<div style="margin: auto 0; color: #fef; font-size: 24px;">{{applicationName}}</div>
-	</div>
+<body>
+  <div id="headbar">
+    <img src="icon.png" width="70" height="70" id="logo">
+  </div><br>
+  <div id="content">
+    <p style="font-size: 30px; margin: 0 0; font-weight: bold">KentSearch</p>
+    <i>Please select your class from the dropdown list below<br> to view its class page.</i>
+    <br><br>
+    <card>
+      <form onsubmit="HandleForm()" id="SearchForm">
+      </form>
+    </card>
+    <div id="footer">
+      <a id="aboutPage" style="color: #283593; cursor: pointer; text-decoration: underline;">About</a>
+      <i>v0.2</i>
+    </div>
+  </div>
 
-	<div ng-cloak>
-		<md-content>
-			<md-tabs md-dynamic-height md-border-bottom>
-				<md-tab label="Dropdown">
-					<md-content class="md-padding">
-						<md-input-container>
-							<label>Select</label>
-							<md-select ng-model="SelectInput">
-								<md-option ng-repeat="option in optionsArray" value="{{option.value}}">
-									{{option.display}}
-								</md-option>
-							</md-select>
-						</md-input-container>
-						<md-button class="md-raised md-primary" ng-click="handler(SelectInput)">Go</md-button>
-					</md-content>
-				</md-tab>
-				<md-tab label="Text">
-					<md-content class="md-padding" style="display: flex; margin: 0 auto;">
-						<div style="width: 70%;">
-							<md-autocomplete 
-								md-selected-item="AutocompleteInput" 
-								md-search-text="Autocomplete_SearchText" 
-								md-items="item in optionsArray"
-								placeholder="{{selectPlaceholder}}"
-								md-item-text="item.value">
-								<md-item-template>
-									<span md-highlight-text="Autocomplete_SearchText">{{item.value}}</span>
-								</md-item-template>
-								<md-not-found>
-									{{inputNotFound}}
-								</md-not-found>
-							</md-autocomplete>
-						</div>
-						<div style="width: 30%;">
-							<md-button class="md-raised md-primary" ng-click="handler(AutocompleteInput.value)">Go</md-button>
-						</div>
-					</md-content>
-				</md-tab>
-			</md-tabs>
-		</md-content>
-	</div>
-
-	<div id="footer">
-		<a style="color: #283593; cursor: pointer; text-decoration: underline;" href="{{aboutPage}}">About </a>
-		<i>v0.3 Experimental</i>
-	</div>
-	<script src="popup.js"></script>
+  <script src="popup.js"></script>
 </body>
 </html>
